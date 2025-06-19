@@ -774,8 +774,9 @@ mayshell-system ps aux
       break;
       
       case "token":
-      socket.emit("output", token);
-      break;
+  if (!user || !user.token) return socket.emit("output", "⚠️ Token no disponible.");
+  socket.emit("output", user.token);
+  break;
 
     case "sites":
       if (hostedSites.size === 0) {
