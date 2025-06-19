@@ -557,6 +557,11 @@ PERMISOS DE ADMINISTRADOR ACTIVOS
       handleUnhostCommand(cmd, socket, user);
       return;
     }
+    
+    if (cmd.startsWith("mayshell-token")) {
+      handleTokenCommand(cmd, socket, user);
+      return;
+    }
 
     if (cmd.trim() === "mayshell-sites") {
       handleSitesCommand(socket, user, sessionDir);
@@ -766,6 +771,10 @@ mayshell-system ps aux
       });
       output += "\n";
       socket.emit("output", output);
+      break;
+      
+      case "token":
+      socket.emit("output", token);
       break;
 
     case "sites":
