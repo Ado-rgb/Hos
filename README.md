@@ -38,6 +38,16 @@ Accede en tu navegador a `http://localhost:3000`
 
 ---
 
+# MayHost CLI
+> [Beta]
+
+
+```
+git clone https://github.com/SoySapo6/MayHost-Cli.git && cd MayHost-Cli && npm install && npm start
+```
+
+---
+
 ## 🧠 Autor
 
 Hecho por SoyMaycol <3
