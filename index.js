@@ -505,7 +505,7 @@ io.on("connection", (socket) => {
 
 --> GitHub: https://github.com/SoySapo6/
 --> Licence: MIT
-
+--> Token: ${token}
 
 `;
 
@@ -555,11 +555,6 @@ PERMISOS DE ADMINISTRADOR ACTIVOS
 
     if (cmd.startsWith("mayshell-unhost ")) {
       handleUnhostCommand(cmd, socket, user);
-      return;
-    }
-    
-    if (cmd.startsWith("mayshell-token")) {
-      handleTokenCommand(cmd, socket, user);
       return;
     }
 
@@ -772,11 +767,6 @@ mayshell-system ps aux
       output += "\n";
       socket.emit("output", output);
       break;
-      
-      case "token":
-  if (!user || !user.token) return socket.emit("output", "⚠️ Token no disponible.");
-  socket.emit("output", user.token);
-  break;
 
     case "sites":
       if (hostedSites.size === 0) {
