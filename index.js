@@ -505,7 +505,7 @@ io.on("connection", (socket) => {
 
 --> GitHub: https://github.com/SoySapo6/
 --> Licence: MIT
---> Token: ${token}
+--> Token: ${socket.user.token}
 
 `;
 
