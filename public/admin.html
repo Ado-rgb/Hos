@@ -478,6 +478,9 @@
                 <button class="tab status" onclick="showTab('status')">
                 <i class="fas fa-clock"></i> Usuarios
                 </button>
+                <button class="tab env" onclick="showTab('env')">
+                <i class="fas fa-archive"></i> Configuracion
+                </button>
                 <button class="tab" onclick="location.href='/terminal'">
                 <i class="fas fa-terminal"></i> Terminal
                 </button>
@@ -531,6 +534,44 @@
   </div>
 </div>
             
+            <!-- Tab Env -->
+            <div id="env-tab" class="tab-content hidden">
+  <div class="card">
+    <h3 class="card-title">
+      <i class="fas fa-archive"></i> Editar Configuración del Sistema
+    </h3>
+
+    <div class="alert success" id="env-success"></div>
+    <div class="alert error" id="env-error"></div>
+
+    <form id="env-form">
+      <label>👑 OWNER_USER</label>
+      <input type="text" name="OWNER_USER" required>
+
+      <label>🔐 OWNER_PASSWORD</label>
+      <input type="password" name="OWNER_PASSWORD" required>
+
+      <label>📧 OWNER_EMAIL</label>
+      <input type="email" name="OWNER_EMAIL" required>
+
+      <label>🚪 PORT</label>
+      <input type="number" name="PORT" required>
+
+      <label>🌐 URL</label>
+      <input type="text" name="URL" required>
+
+      <label>📁 SESSIONS_DIR</label>
+      <input type="text" name="SESSIONS_DIR" required>
+
+      <label>🗂️ USERS_FILE</label>
+      <input type="text" name="USERS_FILE" required>
+
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Guardar Configuración
+      </button>
+    </form>
+  </div>
+</div>
             <!-- Tab Terminal -->
             <div id="terminal-tab" class="tab-content">
                 <div class="card">
@@ -559,6 +600,46 @@
         let currentUser = null;
         let authToken = null;
 
+        // Configuracion (env)
+        document.getElementById('env-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const data = {
+    OWNER_USER: form.OWNER_USER.value,
+    OWNER_PASSWORD: form.OWNER_PASSWORD.value,
+    OWNER_EMAIL: form.OWNER_EMAIL.value,
+    PORT: form.PORT.value,
+    URL: form.URL.value,
+    SESSIONS_DIR: form.SESSIONS_DIR.value,
+    USERS_FILE: form.USERS_FILE.value
+  };
+
+  // Limpiar mensajes
+  document.getElementById('env-success').textContent = '';
+  document.getElementById('env-error').textContent = '';
+
+  try {
+    const res = await fetch('/api/env', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      document.getElementById('env-success').textContent = result.message;
+    } else {
+      document.getElementById('env-error').textContent = result.error || 'Error desconocido';
+    }
+  } catch (err) {
+    document.getElementById('env-error').textContent = 'Error al conectar con el servidor.';
+    console.error(err);
+  }
+});
+        
+        
         // Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
