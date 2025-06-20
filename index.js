@@ -48,7 +48,7 @@ if (!fs.existsSync(USERS_FILE)) {
     email: process.env.OWNER_EMAIL,
     password: hashPassword(process.env.OWNER_PASSWORD || "admin123"),
     token: generateToken(),
-    sessionId: `${process.env.OWNER_USERNAME}`,
+    sessionId: `${process.env.OWNER_USER}`,
     role: "owner",
     createdAt: new Date().toISOString()
   }]
@@ -979,7 +979,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor MayShell en http://localhost:${PORT}`);
   console.log(`Directorio de sesiones: ${SESSIONS_DIR}`);
-  console.log(`Owner: ${process.env.OWNER_USERNAME} (${process.env.OWNER_EMAIL})`);
+  console.log(`Owner: ${process.env.OWNER_USER} (${process.env.OWNER_EMAIL})`);
   console.log("\nRutas disponibles:");
   console.log("- GET  /           - Página principal");
   console.log("- GET  /terminal   - Terminal web");
