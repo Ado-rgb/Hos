@@ -1,5 +1,5 @@
 {
   "watch": [".env"],
   "ext": "env",
-  "ignore": ["*"]
+  "ignore": ["*.*", "**/*", "!*.env"]
 }
