@@ -225,6 +225,49 @@ app.get('/pages/:siteName/*?', (req, res) => {
   });
 });
 
+
+//API para editar el .env desde la app
+app.post("/api/env", (req, res) => {
+  const {
+    OWNER_USER,
+    OWNER_PASSWORD,
+    OWNER_EMAIL,
+    PORT,
+    URL,
+    SESSIONS_DIR,
+    USERS_FILE
+  } = req.body;
+
+  // Validación simple
+  if (!OWNER_USER || !OWNER_PASSWORD || !OWNER_EMAIL) {
+    return res.status(400).json({ error: "Faltan datos del OWNER" });
+  }
+
+  // Construcción del nuevo contenido del .env
+  const newEnv = `
+# Configuración para Owner
+OWNER_USER=${OWNER_USER}
+OWNER_PASSWORD=${OWNER_PASSWORD}
+OWNER_EMAIL=${OWNER_EMAIL}
+
+# Configuración del Sistema
+PORT=${PORT}
+URL=${URL}
+SESSIONS_DIR=${SESSIONS_DIR}
+USERS_FILE=${USERS_FILE}
+`.trim(); // Para evitar espacios al principio
+
+  // Guardar en .env
+  fs.writeFile(".env", newEnv, (err) => {
+    if (err) {
+      console.error("Error al guardar .env:", err);
+      return res.status(500).json({ error: "No se pudo guardar el archivo .env" });
+    }
+
+    res.json({ message: "✅ Archivo .env actualizado con éxito" });
+  });
+});
+
 // API para listar sitios hospedados
 app.get('/api/hosted-sites', (req, res) => {
   const sites = Array.from(hostedSites.entries()).map(([name, data]) => ({
