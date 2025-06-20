@@ -8,10 +8,11 @@ const crypto = require("crypto");
 const os = require('os');
 const cors = require("cors");
 const chokidar = require("chokidar");
-
+const dotenv = require("dotenv");
 const app = express();
 const server = http.createServer(app);
 
+dotenv.config();
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST'],
@@ -27,12 +28,6 @@ const io = socketIO(server, {
   }
 });
 
-// Configuración
-const SESSIONS_DIR = path.join(__dirname, "sessions");
-const USERS_FILE = path.join(__dirname, "users.json");
-const OWNER_EMAIL = "soymaycol.cn@gmail.com";
-const OWNER_USERNAME = "SoyMaycol";
-
 // Almacén de sitios hospedados
 let hostedSites = new Map(); // { siteName: { userDir, watcher, sockets } }
 
@@ -44,16 +39,16 @@ if (!fs.existsSync(SESSIONS_DIR)) {
 // Inicializar archivo de usuarios si no existe
 if (!fs.existsSync(USERS_FILE)) {
   const initialData = {
-    users: [{
-      username: OWNER_USERNAME,
-      email: OWNER_EMAIL,
-      password: hashPassword("maycol123"),
-      token: generateToken(),
-      sessionId: `${OWNER_USERNAME}/shell`,
-      role: "owner",
-      createdAt: new Date().toISOString()
-    }]
-  };
+  users: [{
+    username: process.env.OWNER_USER,
+    email: process.env.OWNER_EMAIL,
+    password: hashPassword(process.env.OWNER_PASSWORD || "admin123"),
+    token: generateToken(),
+    sessionId: `${process.env.OWNER_USER}`,
+    role: "owner",
+    createdAt: new Date().toISOString()
+  }]
+};
   fs.writeFileSync(USERS_FILE, JSON.stringify(initialData, null, 2), 'utf8');
 }
 
