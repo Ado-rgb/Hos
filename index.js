@@ -30,6 +30,7 @@ const io = socketIO(server, {
 
 //Configuraciones por seguridad
 const SESSIONS_DIR = process.env.SESSIONS_DIR || "sessions/";
+const USERS_FILE = process.env.USERS_FILE || "users.json";
 
 // Almacén de sitios hospedados
 let hostedSites = new Map(); // { siteName: { userDir, watcher, sockets } }
