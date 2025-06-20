@@ -31,7 +31,6 @@ const io = socketIO(server, {
 //Configuraciones por seguridad
 const SESSIONS_DIR = process.env.SESSIONS_DIR || "sessions/";
 const USERS_FILE = process.env.USERS_FILE || "users.json";
-const OWNER_USERNAME = process.env.OWNER_USER || "admin";
 
 // Almacén de sitios hospedados
 let hostedSites = new Map(); // { siteName: { userDir, watcher, sockets } }
@@ -49,7 +48,7 @@ if (!fs.existsSync(USERS_FILE)) {
     email: process.env.OWNER_EMAIL,
     password: hashPassword(process.env.OWNER_PASSWORD || "admin123"),
     token: generateToken(),
-    sessionId: `${process.env.OWNER_USER}`,
+    sessionId: `${process.env.OWNER_USERNAME}`,
     role: "owner",
     createdAt: new Date().toISOString()
   }]
@@ -980,7 +979,7 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor MayShell en http://localhost:${PORT}`);
   console.log(`Directorio de sesiones: ${SESSIONS_DIR}`);
-  console.log(`Owner: ${OWNER_USERNAME} (${OWNER_EMAIL})`);
+  console.log(`Owner: ${process.env.OWNER_USERNAME} (${process.env.OWNER_EMAIL})`);
   console.log("\nRutas disponibles:");
   console.log("- GET  /           - Página principal");
   console.log("- GET  /terminal   - Terminal web");
