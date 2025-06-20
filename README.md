@@ -30,6 +30,7 @@ MayHost-Panel/
 ```bash
 git clone https://github.com/SoySapo6/MayHost-Panel.git
 cd MayHost-Panel
+# Editas el .env
 npm install
 node index.js
 ```
