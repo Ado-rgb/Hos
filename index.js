@@ -28,6 +28,9 @@ const io = socketIO(server, {
   }
 });
 
+//Configuraciones (una por el momento)
+const SESSIONS_DIR = process.env.SESSIONS_DIR || "sessions/";
+
 // Almacén de sitios hospedados
 let hostedSites = new Map(); // { siteName: { userDir, watcher, sockets } }
 
