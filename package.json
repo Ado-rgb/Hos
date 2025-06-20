@@ -13,8 +13,5 @@
     "socket.io": "^4.7.2",
     "chokidar": "*",
     "dotenv": "*"
-  },
-  "devDependencies": {
-  "nodemon": "*"
   }
 }
