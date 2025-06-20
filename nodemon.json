@@ -1,6 +1,0 @@
-{
-  "watch": [".env"],
-  "ignore": ["*"],
-  "verbose": true,
-  "legacyWatch": true
-}
