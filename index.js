@@ -239,15 +239,13 @@ app.post("/api/env", (req, res) => {
     PORT,
     URL,
     SESSIONS_DIR,
-    USERS_FILE
+    USERS_FILE,
   } = req.body;
 
-  // Validación simple
   if (!OWNER_USER || !OWNER_PASSWORD || !OWNER_EMAIL) {
     return res.status(400).json({ error: "Faltan datos del OWNER" });
   }
 
-  // Construcción del nuevo contenido del .env
   const newEnv = `
 # Configuración para Owner
 OWNER_USER=${OWNER_USER}
@@ -259,16 +257,25 @@ PORT=${PORT}
 URL=${URL}
 SESSIONS_DIR=${SESSIONS_DIR}
 USERS_FILE=${USERS_FILE}
-`.trim(); // Para evitar espacios al principio
+`.trim();
 
-  // Guardar en .env
   fs.writeFile(".env", newEnv, (err) => {
     if (err) {
-      console.error("Error al guardar .env:", err);
+      console.error("❌ Error al guardar .env:", err);
       return res.status(500).json({ error: "No se pudo guardar el archivo .env" });
     }
 
-    res.json({ message: "✅ Archivo .env actualizado con éxito" });
+    // 🧠 Recargar las variables de entorno sin reiniciar
+    dotenv.config();
+
+    res.json({
+      message: "✅ Archivo .env actualizado y variables recargadas",
+      nuevasVariables: {
+        OWNER_USER: process.env.OWNER_USER,
+        PORT: process.env.PORT,
+        // etc...
+      },
+    });
   });
 });
 
