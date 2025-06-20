@@ -479,7 +479,7 @@
                 <i class="fas fa-clock"></i> Usuarios
                 </button>
                 <button class="tab env" onclick="showTab('env')">
-                <i class="fas fa-archive"></i> Configuracion
+                <i class="fas fa-archive"></i> Configuracion [Beta]
                 </button>
                 <button class="tab" onclick="location.href='/terminal'">
                 <i class="fas fa-terminal"></i> Terminal
@@ -535,36 +535,50 @@
 </div>
             
             <!-- Tab Env -->
-            <div id="env-tab" class="tab-content">
+<div id="env-tab" class="tab-content">
   <div class="card">
     <h3 class="card-title">
       <i class="fas fa-archive"></i> Editar Configuración del Sistema
     </h3>
 
-    <div class="alert success" id="env-success"></div>
-    <div class="alert error" id="env-error"></div>
+    <div id="env-success" class="alert success" style="display: none;"></div>
+    <div id="env-error" class="alert error" style="display: none;"></div>
 
-    <form id="env-form">
-      <label>👑 OWNER_USER</label>
-      <input type="text" name="OWNER_USER" required>
+    <form id="env-form" class="form-grid">
+      <div class="form-group">
+        <label for="OWNER_USER">👑 Usuario Propietario</label>
+        <input type="text" id="OWNER_USER" name="OWNER_USER" required>
+      </div>
 
-      <label>🔐 OWNER_PASSWORD</label>
-      <input type="password" name="OWNER_PASSWORD" required>
+      <div class="form-group">
+        <label for="OWNER_PASSWORD">🔐 Contraseña</label>
+        <input type="password" id="OWNER_PASSWORD" name="OWNER_PASSWORD" required>
+      </div>
 
-      <label>📧 OWNER_EMAIL</label>
-      <input type="email" name="OWNER_EMAIL" required>
+      <div class="form-group">
+        <label for="OWNER_EMAIL">📧 Correo Electrónico</label>
+        <input type="email" id="OWNER_EMAIL" name="OWNER_EMAIL" required>
+      </div>
 
-      <label>🚪 PORT</label>
-      <input type="number" name="PORT" required>
+      <div class="form-group">
+        <label for="PORT">🚪 Puerto</label>
+        <input type="number" id="PORT" name="PORT" required>
+      </div>
 
-      <label>🌐 URL</label>
-      <input type="text" name="URL" required>
+      <div class="form-group">
+        <label for="URL">🌐 URL</label>
+        <input type="text" id="URL" name="URL" required>
+      </div>
 
-      <label>📁 SESSIONS_DIR</label>
-      <input type="text" name="SESSIONS_DIR" required>
+      <div class="form-group">
+        <label for="SESSIONS_DIR">📁 Carpeta de Sesiones</label>
+        <input type="text" id="SESSIONS_DIR" name="SESSIONS_DIR" required>
+      </div>
 
-      <label>🗂️ USERS_FILE</label>
-      <input type="text" name="USERS_FILE" required>
+      <div class="form-group">
+        <label for="USERS_FILE">🗂️ Archivo de Usuarios</label>
+        <input type="text" id="USERS_FILE" name="USERS_FILE" required>
+      </div>
 
       <button type="submit" class="btn btn-primary">
         <i class="fas fa-save"></i> Guardar Configuración
@@ -605,19 +619,22 @@
   e.preventDefault();
 
   const form = e.target;
+
   const data = {
-    OWNER_USER: form.OWNER_USER.value,
+    OWNER_USER: form.OWNER_USER.value.trim(),
     OWNER_PASSWORD: form.OWNER_PASSWORD.value,
-    OWNER_EMAIL: form.OWNER_EMAIL.value,
+    OWNER_EMAIL: form.OWNER_EMAIL.value.trim(),
     PORT: form.PORT.value,
-    URL: form.URL.value,
-    SESSIONS_DIR: form.SESSIONS_DIR.value,
-    USERS_FILE: form.USERS_FILE.value
+    URL: form.URL.value.trim(),
+    SESSIONS_DIR: form.SESSIONS_DIR.value.trim(),
+    USERS_FILE: form.USERS_FILE.value.trim()
   };
 
-  // Limpiar mensajes
-  document.getElementById('env-success').textContent = '';
-  document.getElementById('env-error').textContent = '';
+  const successMsg = document.getElementById('env-success');
+  const errorMsg = document.getElementById('env-error');
+
+  successMsg.style.display = 'none';
+  errorMsg.style.display = 'none';
 
   try {
     const res = await fetch('/api/env', {
@@ -629,12 +646,15 @@
     const result = await res.json();
 
     if (res.ok) {
-      document.getElementById('env-success').textContent = result.message;
+      successMsg.textContent = result.message || 'Configuración guardada exitosamente.';
+      successMsg.style.display = 'block';
     } else {
-      document.getElementById('env-error').textContent = result.error || 'Error desconocido';
+      errorMsg.textContent = result.error || 'Error desconocido al guardar configuración.';
+      errorMsg.style.display = 'block';
     }
   } catch (err) {
-    document.getElementById('env-error').textContent = 'Error al conectar con el servidor.';
+    errorMsg.textContent = '❌ Error al conectar con el servidor.';
+    errorMsg.style.display = 'block';
     console.error(err);
   }
 });
