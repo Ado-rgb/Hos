@@ -660,7 +660,7 @@ function handleHostCommand(cmd, socket, user, sessionDir) {
   socket.emit("output", `
 ✅ Sitio '${siteName}' hospedado exitosamente!
 
-🌐 URL: http://localhost:${process.env.PORT || 3000}${siteUrl}
+🌐 URL: ${process.env.URL}${process.env.PORT || 3000}${siteUrl}
 📁 Directorio: ${path.relative(SESSIONS_DIR, userCurrentDir)}
 🔄 Monitoreo de cambios: ACTIVO
 
