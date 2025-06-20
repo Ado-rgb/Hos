@@ -231,6 +231,9 @@ app.get('/pages/:siteName/*?', (req, res) => {
 
 
 //API para editar el .env desde la app
+const fs = require("fs");
+const dotenv = require("dotenv");
+
 app.post("/api/env", (req, res) => {
   const {
     OWNER_USER,
@@ -265,15 +268,15 @@ USERS_FILE=${USERS_FILE}
       return res.status(500).json({ error: "No se pudo guardar el archivo .env" });
     }
 
-    // 🧠 Recargar las variables de entorno sin reiniciar
-    dotenv.config();
+    // ⚡ Recargar sobrescribiendo variables existentes
+    dotenv.config({ override: true });
 
     res.json({
       message: "✅ Archivo .env actualizado y variables recargadas",
       nuevasVariables: {
         OWNER_USER: process.env.OWNER_USER,
         PORT: process.env.PORT,
-        // etc...
+        URL: process.env.URL,
       },
     });
   });
