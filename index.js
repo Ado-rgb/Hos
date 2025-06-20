@@ -12,7 +12,7 @@ const dotenv = require("dotenv");
 const app = express();
 const server = http.createServer(app);
 
-dotenv.config();
+dotenv.config({ override: true });
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST'],
@@ -231,9 +231,6 @@ app.get('/pages/:siteName/*?', (req, res) => {
 
 
 //API para editar el .env desde la app
-const fs = require("fs");
-const dotenv = require("dotenv");
-
 app.post("/api/env", (req, res) => {
   const {
     OWNER_USER,
@@ -268,8 +265,6 @@ USERS_FILE=${USERS_FILE}
       return res.status(500).json({ error: "No se pudo guardar el archivo .env" });
     }
 
-    // ⚡ Recargar sobrescribiendo variables existentes
-    dotenv.config({ override: true });
 
     res.json({
       message: "✅ Archivo .env actualizado y variables recargadas",
