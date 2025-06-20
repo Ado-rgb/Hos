@@ -14,4 +14,7 @@
     "chokidar": "*",
     "dotenv": "*"
   }
+  "devDependencies": {
+  "nodemon": "*"
+  }
 }
