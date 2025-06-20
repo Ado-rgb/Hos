@@ -28,8 +28,14 @@ const io = socketIO(server, {
   }
 });
 
-//Configuraciones (una por el momento)
+//Configuraciones por seguridad
 const SESSIONS_DIR = process.env.SESSIONS_DIR || "sessions/";
+const USERS_FILE = process.env.USERS_FILE || "users.json";
+const PORT = process.env.PORT || 3000;
+const URL = process.env.URL || `http://localhost:${PORT}`;
+const OWNER_USER = process.env.OWNER_USER || "admin";
+const OWNER_PASSWORD = process.env.OWNER_PASSWORD || "admin123";
+const OWNER_EMAIL = process.env.OWNER_EMAIL || "admin@example.com";
 
 // Almacén de sitios hospedados
 let hostedSites = new Map(); // { siteName: { userDir, watcher, sockets } }
