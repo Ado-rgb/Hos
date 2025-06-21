@@ -552,6 +552,7 @@ io.on("connection", (socket) => {
 --> GitHub: https://github.com/SoySapo6/
 --> Licence: MIT
 --> Token: ${socket.user.token}
+--> Ko-Fi: https://ko-fi.com/soymaycol
 
 `;
 
