@@ -156,6 +156,49 @@ function watchSiteFiles(siteName, userDir) {
   return watcher;
 }
 
+//API para ver el Env:
+function getSortedEnv() {
+  const sorted = {};
+  Object.keys(process.env)
+    .sort()
+    .forEach((key) => {
+      sorted[key] = process.env[key];
+    });
+  return sorted;
+}
+
+// Endpoint seguro
+app.post("/api/env", (req, res) => {
+  const { email, password } = req.body;
+
+  // Verificar owner
+  if (
+    email === process.env.OWNER_EMAIL &&
+    password === process.env.OWNER_PASSWORD
+  ) {
+    const envData = getSortedEnv();
+    res.json({
+      status: "success",
+      env: envData,
+    });
+  } else {
+    res.status(401).json({
+      status: "error",
+      message: "Credenciales incorrectas",
+    });
+  }
+});
+
+// Filtro para rechazar GET u otros métodos
+app.all("/api/env", (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      status: "error",
+      message: "Método no permitido. Usa POST.",
+    });
+  }
+});
+
 //Estado del servidor
 app.get('/status', (req, res) => {
   const totalMem = os.totalmem();
