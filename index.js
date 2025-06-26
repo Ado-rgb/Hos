@@ -167,25 +167,33 @@ function getSortedEnv() {
   return sorted;
 }
 
-// Endpoint seguro
-app.post("/api/env", (req, res) => {
-  const { email, password } = req.body;
+// API para soporte
+app.get('/api/soporte', async (req, res) => {
+  const { user, mail, message } = req.query;
 
-  // Verificar owner
-  if (
-    email === process.env.OWNER_EMAIL &&
-    password === process.env.OWNER_PASSWORD
-  ) {
-    const envData = getSortedEnv();
-    res.json({
-      status: "success",
-      env: envData,
+  if (!user || !mail || !message) {
+    return res.status(400).json({ error: 'Faltan parámetros, bebé! (｡･ω･｡)ﾉ♡' });
+  }
+
+  try {
+    const nglResponse = await axios.post('https://ngl.link/api/submit', {
+      username: OWNER_NGL,
+      question: `Soporte de ${user} (${mail}): ${message}`,
+      deviceId: 'MAYCODE-API'
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
-  } else {
-    res.status(401).json({
-      status: "error",
-      message: "Credenciales incorrectas",
+
+    return res.json({
+      success: true,
+      message: 'Se envió el soporte a NGL con éxito ⊂(・▽・)⊃',
+      nglResponse: nglResponse.data
     });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Ocurrió un fallo mandando el soporte 💔' });
   }
 });
 
