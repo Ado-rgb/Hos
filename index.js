@@ -177,7 +177,7 @@ app.get('/api/soporte', async (req, res) => {
 
   try {
     const nglResponse = await axios.post('https://ngl.link/api/submit', {
-      username: process.env.OWNER_USER,
+      username: process.env.OWNER_NGL,
       question: `Soporte de ${user} (${mail}): ${message}`,
       deviceId: 'MayHost'
     }, {
