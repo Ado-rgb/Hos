@@ -554,6 +554,7 @@ function authenticateOwner(req, res, next) {
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/terminal", (req, res) => res.sendFile(path.join(__dirname, "public", "terminal.html")));
 app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
+app.get("/soporte", (req, res) => res.sendFile(path.join(__dirname, "public", "soporte.html")));
 
 // Autenticación de Socket.IO
 io.use((socket, next) => {
