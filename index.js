@@ -177,9 +177,9 @@ app.get('/api/soporte', async (req, res) => {
 
   try {
     const nglResponse = await axios.post('https://ngl.link/api/submit', {
-      username: OWNER_NGL,
+      username: process.env.OWNER_USER,
       question: `Soporte de ${user} (${mail}): ${message}`,
-      deviceId: 'MAYCODE-API'
+      deviceId: 'MayHost'
     }, {
       headers: {
         'Content-Type': 'application/json'
