@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MayHost Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #ff8a00;
+            --secondary-color: #e52e71;
+            --dark-bg: #121212;
+            --darker-bg: #0d0d0d;
+            --card-bg: #1e1e1e;
+            --sidebar-bg: #181818;
+            --text-color: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+        
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255, 138, 0, 0.1);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .nav-item i {
+            width: 20px;
+            margin-right: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .nav-section {
+            padding: 1rem 1.5rem 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1rem;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            min-height: 100vh;
+            background-color: var(--dark-bg);
+            transition: margin-left 0.3s ease;
+        }
+        
+        .main-content.expanded {
+            margin-left: 0;
+        }
+        
+        .header {
+            background-color: var(--darker-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--card-bg);
+            border-radius: 25px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .system-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .system-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .system-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .system-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .system-info p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .system-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-section {
+            display: none;
+        }
+
+        .info-section.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .info-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card h3 i {
+            color: var(--primary-color);
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-card li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card li:last-child {
+            border-bottom: none;
+        }
+
+        .info-card li i {
+            color: var(--success-color);
+            width: 16px;
+        }
+
+        .hero-info {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(45deg, rgba(255, 138, 0, 0.1), rgba(229, 46, 113, 0.1));
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-info img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 3px solid var(--primary-color);
+        }
+
+        .hero-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-info p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 46, 113, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 46, 113, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 138, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .team-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .team-member {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .team-member img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--primary-color);
+        }
+
+        .team-member h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-member .role {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-member .description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .detail-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-online {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .system-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .system-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+                        @media (max-width: 480px) {
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .system-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .hero-info h1 {
+                font-size: 2rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 280px;
+            }
+        } {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <img src="https://files.catbox.moe/zee841.png" alt="MayHost Logo" class="logo">
+                <span class="logo-text">MayHost</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="#info" class="nav-item" data-section="info">
+                <i class="fas fa-info-circle"></i>
+                Información
+            </a>
+            <a href="/terminal" class="nav-item">
+                <i class="fas fa-terminal"></i>
+                Terminal
+            </a>
+            <a href="https://wa.me/51921826291?text=%C2%A1Hola%20SoyMaycol!%20Tengo%20un%20incoveniente%20en%20tu%20Host%20%3A%2F" class="nav-item">
+                <i class="fas fa-headset"></i>
+                Soporte
+            </a>
+            <div class="nav-section">Enlaces</div>
+            <a href="https://ko-fi.com/soymaycol" class="nav-item" target="_blank">
+                <i class="fas fa-coffee"></i>
+                Ko-fi
+            </a>
+            <a href="/admin" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Admin
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">?</div>
+                    <span>Usuario</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="dashboard-section">
+                <div id="loadingState" class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Cargando estadísticas del servidor...</p>
+                </div>
+
+                <div id="dashboardContent" style="display: none;">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Memoria Total</span>
+                                <div class="stat-icon" style="background: rgba(76, 175, 80, 0.2); color: #4caf50;">
+                                    <i class="fas fa-memory"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="memoryTotal">0 MB</div>
+                            <div class="stat-subtitle">Memoria del sistema</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Memoria Usada</span>
+                                <div class="stat-icon" style="background: rgba(255, 152, 0, 0.2); color: #ff9800;">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="memoryUsed">0 MB</div>
+                            <div class="stat-subtitle" id="memoryPercent">0% de uso</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="memoryProgress" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">Uptime</span>
+                                <div class="stat-icon" style="background: rgba(33, 150, 243, 0.2); color: #2196f3;">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="uptime">0 min</div>
+                            <div class="stat-subtitle">Tiempo activo</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">CPU Cores</span>
+                                <div class="stat-icon" style="background: rgba(156, 39, 176, 0.2); color: #9c27b0;">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="cpuCores">0</div>
+                            <div class="stat-subtitle" id="cpuModel">Procesador</div>
+                        </div>
+                    </div>
+
+                    <div class="system-card">
+                        <div class="system-header">
+                            <div class="system-logo">
+                                <i class="fab fa-linux"></i>
+                            </div>
+                            <div class="system-info">
+                                <h2>MayHost Server</h2>
+                                <p>Sistema de hosting profesional</p>
+                                <div class="status-badge status-online" id="systemStatus">
+                                    <span class="status-dot"></span>
+                                    <span>Todo OK</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="system-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Plataforma</div>
+                                <div class="detail-value" id="platform">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Arquitectura</div>
+                                <div class="detail-value" id="architecture">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Memoria Libre</div>
+                                <div class="detail-value" id="memoryFree">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Carga Promedio</div>
+                                <div class="detail-value" id="loadAverage">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Section -->
+            <div id="info-section" class="info-section">
+                <div class="hero-info">
+                    <img src="https://files.catbox.moe/zee841.png" alt="MayHost Logo">
+                    <h1>MayHost</h1>
+                    <p>Soluciones de hosting profesionales y fáciles de usar para tus proyectos. Sin complicaciones, sin verificación de correo, solo una experiencia simple y potente.</p>
+                    <div class="cta-buttons">
+                        <a href="/terminal" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i> Comenzar Ahora
+                        </a>
+                        <a href="https://whatsapp.com/channel/0029VayXJte65yD6LQGiRB0R" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-comment"></i> Sígueme
+                        </a>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3><i class="fas fa-bolt"></i> Interfaz Fácil de Usar</h3>
+                        <p>Diseñada para ser intuitiva y sencilla, nuestra interfaz te permite gestionar tu hosting sin complicaciones.</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3><i class="fas fa-database"></i> DataBase</h3>
+                        <p>Proyectos con DataBases, Perfecto para este Host!</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3><i class="fas fa-lock-open"></i> Sin Verificación</h3>
+                        <p>No necesitas verificar tu correo electrónico. Simplemente crea una cuenta con usuario y contraseña.</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3><i class="fas fa-shield-alt"></i> Seguridad Garantizada</h3>
+                        <p>Tu información y proyectos están protegidos con las mejores prácticas de seguridad.</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3><i class="fas fa-headset"></i> Soporte Técnico</h3>
+                        <p>Nuestro equipo está disponible para ayudarte con cualquier problema que puedas tener.</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3><i class="fas fa-tachometer-alt"></i> Alto Rendimiento</h3>
+                        <p>Servidores optimizados para ofrecer velocidad y estabilidad en todos tus proyectos.</p>
+                    </div>
+                </div>
+
+                <div class="team-section">
+                    <h2 style="margin-bottom: 2rem;">Creador</h2>
+                    <div class="team-member">
+                        <img src="https://files.catbox.moe/sl2j2i.jpeg" alt="SoyMaycol">
+                        <h3>SoyMaycol</h3>
+                        <div class="role">Programador</div>
+                        <div class="description">Responsable del desarrollo y programación de la plataforma MayHost.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+            sidebar.classList.toggle('hidden');
+            mainContent.classList.toggle('expanded');
+        });
+
+        // Navigation functionality
+        const navItems = document.querySelectorAll('.nav-item[data-section]');
+        const sections = {
+            'dashboard': document.getElementById('dashboard-section'),
+            'info': document.getElementById('info-section')
+        };
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const sectionName = item.getAttribute('data-section');
+                
+                // Update active nav item
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show/hide sections
+                Object.values(sections).forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                if (sections[sectionName]) {
+                    sections[sectionName].style.display = 'block';
+                }
+                
+                // Update page title
+                const pageTitle = document.querySelector('.page-title');
+                pageTitle.textContent = sectionName === 'dashboard' ? 'Dashboard' : 'Información';
+                
+                // Close sidebar on mobile
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('show');
+                    sidebar.classList.add('hidden');
+                    mainContent.classList.add('expanded');
+                }
+            });
+        });
+
+        // Load server statistics
+        async function loadServerStats() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                // Update memory stats
+                document.getElementById('memoryTotal').textContent = data.memoria.total;
+                document.getElementById('memoryUsed').textContent = data.memoria.usada;
+                document.getElementById('memoryFree').textContent = data.memoria.libre;
+                document.getElementById('memoryPercent').textContent = data.memoria.usoPorcentaje + ' de uso';
+                
+                // Update progress bar
+                const memoryPercentNum = parseFloat(data.memoria.usoPorcentaje.replace('%', ''));
+                document.getElementById('memoryProgress').style.width = memoryPercentNum + '%';
+                
+                // Update uptime
+                document.getElementById('uptime').textContent = data.sistema.uptime;
+                
+                // Update CPU info
+                document.getElementById('cpuCores').textContent = data.cpu.nucleos;
+                document.getElementById('cpuModel').textContent = data.cpu.modelo;
+                
+                // Update system details
+                document.getElementById('platform').textContent = data.sistema.plataforma;
+                document.getElementById('architecture').textContent = data.sistema.arquitectura;
+                document.getElementById('loadAverage').textContent = data.cpu.cargaPromedio.join(', ');
+                
+                // Update system status
+                const statusElement = document.getElementById('systemStatus');
+                statusElement.innerHTML = `
+                    <span class="status-dot"></span>
+                    <span>${data.sistema.estado}</span>
+                `;
+                
+                // Hide loading and show content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading server stats:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar las estadísticas del servidor</p>
+                `;
+            }
+        }
+
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadServerStats();
+            
+            // Refresh stats every 30 seconds
+            setInterval(loadServerStats, 30000);
+        });
+
+        // Auto-hide sidebar on mobile when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('show');
+                    sidebar.classList.add('hidden');
+                    mainContent.classList.add('expanded');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('show');
+                sidebar.classList.remove('hidden');
+                mainContent.classList.remove('expanded');
+            } else {
+                sidebar.classList.add('hidden');
+                mainContent.classList.add('expanded');
+            }
+        });
+
+        // Initialize responsive behavior
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('hidden');
+            mainContent.classList.add('expanded');
+        }
+    </script>
+</body>
+</html>
