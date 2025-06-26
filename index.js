@@ -168,31 +168,53 @@ function getSortedEnv() {
 }
 
 // API para soporte
+function randomIP() {
+  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+}
+
 app.get('/api/soporte', async (req, res) => {
   const { user, mail, message } = req.query;
 
   if (!user || !mail || !message) {
-    return res.status(400).json({ error: 'Faltan parámetros, bebé! (｡･ω･｡)ﾉ♡' });
+    return res.status(400).json({ error: 'Faltan parámetros! (⁠｡⁠•́⁠︿⁠•̀⁠｡⁠)' });
   }
 
+  const msg = `🚨 Nuevo soporte recibido 🚨
+
+👤 Usuario: ${user}
+📧 Correo: ${mail}
+💬 Mensaje: ${message}
+
+⊂(⁠(⁠・⁠▽⁠・⁠)⁠)⁠⊃`;
+
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'x-forwarded-for': randomIP()
+  };
+
+  const body = new URLSearchParams({
+    username: OWNER_NGL,
+    question: msg,
+    deviceId: randomUUID()
+  });
+
   try {
-    const nglResponse = await axios.post('https://ngl.link/api/submit', {
-      username: process.env.OWNER_NGL,
-      question: `Soporte de ${user} (${mail}): ${message}`,
-      deviceId: 'MayHost'
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    const nglRes = await fetch('https://ngl.link/api/submit', {
+      method: 'POST',
+      headers,
+      body
     });
 
-    return res.json({
-      success: true,
-      message: 'Se envió el soporte a NGL con éxito ⊂(・▽・)⊃',
-      nglResponse: nglResponse.data
-    });
-  } catch (error) {
-    console.error(error);
+    if (nglRes.status === 200) {
+      return res.json({
+        success: true,
+        message: 'Soporte enviado exitosamente UwU'
+      });
+    } else {
+      throw new Error(`NGL respondió con estado ${nglRes.status}`);
+    }
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: 'Ocurrió un fallo mandando el soporte 💔' });
   }
 });
