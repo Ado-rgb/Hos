@@ -9,7 +9,6 @@ const os = require('os');
 const cors = require("cors");
 const chokidar = require("chokidar");
 const dotenv = require("dotenv");
-const fetch = require('node-fetch');
 const app = express();
 const server = http.createServer(app);
 
@@ -156,79 +155,6 @@ function watchSiteFiles(siteName, userDir) {
 
   return watcher;
 }
-
-//API para ver el Env:
-function getSortedEnv() {
-  const sorted = {};
-  Object.keys(process.env)
-    .sort()
-    .forEach((key) => {
-      sorted[key] = process.env[key];
-    });
-  return sorted;
-}
-
-// API para soporte
-function randomIP() {
-  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
-}
-
-app.get('/api/soporte', async (req, res) => {
-  const { user, mail, message } = req.query;
-
-  if (!user || !mail || !message) {
-    return res.status(400).json({ error: 'Faltan parámetros! (⁠｡⁠•́⁠︿⁠•̀⁠｡⁠)' });
-  }
-
-  const msg = `🚨 Nuevo soporte recibido 🚨
-
-👤 Usuario: ${user}
-📧 Correo: ${mail}
-💬 Mensaje: ${message}
-
-⊂(⁠(⁠・⁠▽⁠・⁠)⁠)⁠⊃`;
-
-  const headers = {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'x-forwarded-for': randomIP()
-  };
-
-  const body = new URLSearchParams({
-    username: process.env.OWNER_NGL,
-    question: msg,
-    deviceId: randomUUID()
-  });
-
-  try {
-    const nglRes = await fetch('https://ngl.link/api/submit', {
-      method: 'POST',
-      headers,
-      body
-    });
-
-    if (nglRes.status === 200) {
-      return res.json({
-        success: true,
-        message: 'Soporte enviado exitosamente UwU'
-      });
-    } else {
-      throw new Error(`NGL respondió con estado ${nglRes.status}`);
-    }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Ocurrió un fallo mandando el soporte 💔' });
-  }
-});
-
-// Filtro para rechazar GET u otros métodos
-app.all("/api/env", (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      status: "error",
-      message: "Método no permitido. Usa POST.",
-    });
-  }
-});
 
 //Estado del servidor
 app.get('/status', (req, res) => {
@@ -577,7 +503,6 @@ function authenticateOwner(req, res, next) {
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 app.get("/terminal", (req, res) => res.sendFile(path.join(__dirname, "public", "terminal.html")));
 app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "public", "admin.html")));
-app.get("/soporte", (req, res) => res.sendFile(path.join(__dirname, "public", "soporte.html")));
 
 // Autenticación de Socket.IO
 io.use((socket, next) => {
