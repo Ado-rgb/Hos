@@ -193,7 +193,7 @@ app.get('/api/soporte', async (req, res) => {
   };
 
   const body = new URLSearchParams({
-    username: OWNER_NGL,
+    username: process.env.OWNER_NGL,
     question: msg,
     deviceId: randomUUID()
   });
