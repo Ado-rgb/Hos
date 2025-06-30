@@ -9,21 +9,6 @@ MayHost Panel es un panel web desarrollado con Node.js que ofrece una interfaz p
 - Gestor de archivos visual. [BETA]
 - Páginas HTML integradas.
 
-## 📂 Estructura del proyecto
-
-```
-MayHost-Panel/
-├── Dockerfile               # Define cómo crear el contenedor del panel
-├── index.js                 # Servidor backend principal (Node.js + Express)
-├── package.json             # Dependencias y scripts
-└── public/                  # Archivos estáticos accesibles desde el navegador
-    ├── 404.html             # Página de error personalizada
-    ├── admin.html           # Panel administrativo
-    ├── file_manager.html    # Explorador de archivos
-    ├── index.html           # Página principal/login
-    └── terminal.html        # Terminal estilo shell
-```
-
 ## 🛠️ Instalación
 
 ### Node.js local
