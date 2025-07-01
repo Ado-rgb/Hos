@@ -9,7 +9,7 @@
     "node": ">=20"
   },
   "dependencies": {
-  "@soymaycol/maycontainers": "^1.2.0",
+  "@soymaycol/maycontainers": "^1.2.4",
   "express": "^4.18.2",
   "socket.io": "^4.7.2",
   "chokidar": "*",
