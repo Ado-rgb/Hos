@@ -982,7 +982,7 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 12005;
 server.listen(PORT, () => {
   console.log(`Servidor MayShell en http://localhost:${PORT}`);
   console.log(`Directorio de sesiones: ${SESSIONS_DIR}`);
