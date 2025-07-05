@@ -48,7 +48,7 @@ if (!fs.existsSync(USERS_FILE)) {
     email: process.env.OWNER_EMAIL,
     password: hashPassword(process.env.OWNER_PASSWORD || "admin123"),
     token: generateToken(),
-    sessionId: `${process.env.OWNER_USER}`,
+    sessionId: ``,
     role: "owner",
     createdAt: new Date().toISOString()
   }]
@@ -90,10 +90,7 @@ function isValidPath(userSessionDir, targetPath) {
 
 function sanitizeCommand(command, userSessionDir) {
   // Lista de comandos peligrosos para usuarios normales
-  const dangerousCommands = [
-    'rm -rf /', 'mkfs', 'dd if=', 'chmod 777 /', 
-    'chown root', 'sudo su', 'su root'
-  ];
+  const dangerousCommands = [];
   
   // Verificar comandos peligrosos
   for (const dangerous of dangerousCommands) {
