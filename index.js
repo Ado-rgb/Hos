@@ -581,9 +581,11 @@ PERMISOS DE ADMINISTRADOR ACTIVOS
 
   // Para admins/owner, permitir acceso al sistema completo con comando especial
   if (user.role === "owner" || user.role === "admin") {
-    ptyOptions.env.MAYSHELL_USER = user.username;
-    ptyOptions.env.MAYSHELL_ROLE = user.role;
-    ptyOptions.env.MAYSHELL_SESSION_DIR = path.resolve(__dirname);
+  const projectRoot = path.resolve(__dirname);
+  ptyOptions.cwd = projectRoot; // <- ¡esto es lo que hace el cambio real!
+  ptyOptions.env.MAYSHELL_SESSION_DIR = projectRoot;
+  ptyOptions.env.MAYSHELL_USER = user.username;
+  ptyOptions.env.MAYSHELL_ROLE = user.role;
   }
 
   const pty = spawn("bash", [], ptyOptions);
