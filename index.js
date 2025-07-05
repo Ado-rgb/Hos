@@ -583,7 +583,7 @@ PERMISOS DE ADMINISTRADOR ACTIVOS
   if (user.role === "owner" || user.role === "admin") {
     ptyOptions.env.MAYSHELL_USER = user.username;
     ptyOptions.env.MAYSHELL_ROLE = user.role;
-    ptyOptions.env.MAYSHELL_SESSION_DIR = sessionDir;
+    ptyOptions.env.MAYSHELL_SESSION_DIR = require('path').join(__dirname, '../');
   }
 
   const pty = spawn("bash", [], ptyOptions);
