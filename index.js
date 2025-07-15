@@ -99,7 +99,7 @@ function sanitizeCommand(command, userSessionDir) {
     }
   }
   
-  // Interceptar comando cd para mantener dentro del directorio de sesión
+  // Interceptar comando cd para mantene dentro del directorio de sesión
   if (command.trim().startsWith('cd ')) {
     const targetDir = command.trim().substring(3).trim() || userSessionDir;
     
