@@ -8,14 +8,14 @@ const { createContainer } = require('@soymaycol/maycontainers');
   const container = createContainer({
     name: username,
     distro: 'alpine',
-    shell: '/bin/sh', // o /bin/bash si prefieres
-    enableRoot: true // opcional
+    enableRoot: true,
+    shell: '/bin/sh',
   });
 
-  // Inicializa el contenedor (esto descarga y prepara todo)
+  // Prepara el contenedor
   await container.init();
 
-  // Ejecuta shell directamente con control de stdin/out
+  // Ejecuta el shell manualmente sin usar shell()
   await container.exec('/bin/sh', {
     stdio: 'inherit'
   });
