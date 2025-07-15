@@ -24,125 +24,133 @@ function muteConsoleLogs(fn) {
   });
 }
 
-// Función para verificar si un comando existe
-async function commandExists(command) {
-  try {
-    await exec(`which ${command}`);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// Función para instalar ngrok si no existe
+// Función para instalar ngrok si no está instalado
 async function installNgrok() {
-  console.log('[MayHost] Checking ngrok installation...');
-  
-  if (await commandExists('ngrok')) {
-    console.log('[MayHost] ngrok already installed');
-    return;
-  }
-
-  console.log('[MayHost] Installing ngrok...');
   try {
-    // Descargar e instalar ngrok
-    await exec('curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null');
-    await exec('echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list');
-    await exec('sudo apt update && sudo apt install ngrok -y');
-    console.log('[MayHost] ngrok installed successfully');
+    await exec('which ngrok');
+    console.log('[MayHost] ngrok already installed');
   } catch (error) {
-    console.error('[MayHost] Error installing ngrok:', error.message);
-    console.log('[MayHost] Trying alternative installation method...');
-    
+    console.log('[MayHost] Installing ngrok...');
     try {
-      await exec('wget -q -O /tmp/ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip');
-      await exec('sudo unzip -o /tmp/ngrok.zip -d /usr/local/bin');
-      await exec('sudo chmod +x /usr/local/bin/ngrok');
-      console.log('[MayHost] ngrok installed via direct download');
-    } catch (altError) {
-      console.error('[MayHost] Failed to install ngrok:', altError.message);
-      console.log('[MayHost] Please install ngrok manually');
+      // Instalar ngrok usando npm
+      await exec('npm install -g ngrok');
+      console.log('[MayHost] ngrok installed successfully');
+    } catch (installError) {
+      console.log('[MayHost] Error installing ngrok:', installError.message);
+      console.log('[MayHost] Please install ngrok manually: https://ngrok.com/download');
+      process.exit(1);
     }
   }
 }
 
 // Función para configurar SFTP en el contenedor
 async function setupSFTP(container) {
+  const rootfs = container.rootfsPath;
+  const proot = container.prootPath;
+  
   console.log('[MayHost] Setting up SFTP server...');
   
-  const setupCommands = [
-    // Instalar openssh-server
-    'apk update && apk add openssh-server openssh-sftp-server',
-    
-    // Generar claves SSH
-    'ssh-keygen -A',
-    
-    // Crear directorio SSH para root
-    'mkdir -p /root/.ssh',
-    
-    // Configurar sshd_config para SFTP
-    `echo 'Port 22
+  // Crear directorio para SFTP si no existe
+  const sftpDir = path.join(rootfs, 'etc', 'ssh');
+  if (!fs.existsSync(sftpDir)) {
+    fs.mkdirSync(sftpDir, { recursive: true });
+  }
+  
+  // Configuración de SSH/SFTP
+  const sshdConfig = `
+Port 2222
 PermitRootLogin yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 Subsystem sftp /usr/lib/openssh/sftp-server
 AllowUsers root
-ChrootDirectory none' > /etc/ssh/sshd_config`,
-    
-    // Establecer contraseña para root
-    'echo "root:mayhost123" | chpasswd',
-    
-    // Crear directorio de trabajo
-    'mkdir -p /root/workspace',
-    
-    // Iniciar servicio SSH
-    '/usr/sbin/sshd -D &'
+`;
+  
+  fs.writeFileSync(path.join(sftpDir, 'sshd_config'), sshdConfig);
+  
+  // Instalar openssh en el contenedor
+  const installCmd = [
+    '-r', rootfs,
+    '-w', '/root',
+    '-b', '/proc',
+    '-b', '/sys',
+    '-b', '/dev',
+    '/bin/sh', '-c',
+    'apk update && apk add openssh openssh-sftp-server && ssh-keygen -A'
   ];
-
-  for (const cmd of setupCommands) {
-    try {
-      const result = await container.exec(cmd);
-      if (result.exitCode !== 0 && !cmd.includes('sshd -D')) {
-        console.log(`[MayHost] Warning: Command failed: ${cmd}`);
+  
+  return new Promise((resolve, reject) => {
+    const installProc = spawn(proot, installCmd, {
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    
+    installProc.on('exit', (code) => {
+      if (code === 0) {
+        console.log('[MayHost] SFTP server configured successfully');
+        resolve();
+      } else {
+        reject(new Error(`SFTP setup failed with code ${code}`));
       }
-    } catch (error) {
-      console.log(`[MayHost] Error executing: ${cmd}`);
-    }
-  }
+    });
+  });
+}
+
+// Función para iniciar el servidor SFTP
+function startSFTPServer(container) {
+  const rootfs = container.rootfsPath;
+  const proot = container.prootPath;
+  
+  const sftpArgs = [
+    '-r', rootfs,
+    '-w', '/root',
+    '-b', '/proc',
+    '-b', '/sys',
+    '-b', '/dev',
+    '-b', '/tmp',
+    '/usr/sbin/sshd', '-D', '-p', '2222', '-f', '/etc/ssh/sshd_config'
+  ];
+  
+  const sftpProc = spawn(proot, sftpArgs, {
+    stdio: ['pipe', 'pipe', 'pipe']
+  });
+  
+  console.log('[MayHost] SFTP server started on port 2222');
+  return sftpProc;
 }
 
 // Función para iniciar ngrok
-async function startNgrok(port = 22) {
+async function startNgrok() {
   console.log('[MayHost] Starting ngrok tunnel...');
   
   return new Promise((resolve, reject) => {
-    const ngrokProcess = spawn('ngrok', ['tcp', port.toString()], {
+    const ngrokProc = spawn('ngrok', ['tcp', '2222'], {
       stdio: ['pipe', 'pipe', 'pipe']
     });
-
+    
     let output = '';
     
-    ngrokProcess.stdout.on('data', (data) => {
+    ngrokProc.stdout.on('data', (data) => {
       output += data.toString();
     });
-
-    ngrokProcess.stderr.on('data', (data) => {
+    
+    ngrokProc.stderr.on('data', (data) => {
       output += data.toString();
     });
-
+    
     // Esperar un poco para que ngrok se inicie
     setTimeout(async () => {
       try {
-        // Obtener la URL pública de ngrok
-        const response = await exec('curl -s localhost:4040/api/tunnels');
+        // Obtener la URL del túnel desde la API de ngrok
+        const response = await exec('curl -s http://127.0.0.1:4040/api/tunnels');
         const tunnels = JSON.parse(response.stdout);
         
         if (tunnels.tunnels && tunnels.tunnels.length > 0) {
           const publicUrl = tunnels.tunnels[0].public_url;
-          console.log(`[MayHost] SFTP accessible at: ${publicUrl}`);
-          console.log(`[MayHost] Username: root`);
-          console.log(`[MayHost] Password: mayhost123`);
-          resolve({ process: ngrokProcess, url: publicUrl });
+          console.log('[MayHost] ✅ SFTP server accessible at:', publicUrl);
+          console.log('[MayHost] Use this URL to connect with your SFTP client');
+          console.log('[MayHost] Username: root');
+          console.log('[MayHost] Password: (set one using passwd command)');
+          resolve(ngrokProc);
         } else {
           reject(new Error('No tunnels found'));
         }
@@ -150,14 +158,9 @@ async function startNgrok(port = 22) {
         reject(error);
       }
     }, 3000);
-
-    ngrokProcess.on('error', (error) => {
-      reject(error);
-    });
   });
 }
 
-// Función principal
 (async () => {
   const username = process.argv[2] || 'default';
 
@@ -174,75 +177,64 @@ async function startNgrok(port = 22) {
   // Ejecutamos el init con logs silenciados
   await muteConsoleLogs(() => container.init());
 
-  // Configurar SFTP
-  await setupSFTP(container);
-
-  // Instalar ngrok
-  await installNgrok();
-
-  // Iniciar ngrok
-  let ngrokInfo;
-  try {
-    ngrokInfo = await startNgrok(22);
-  } catch (error) {
-    console.error('[MayHost] Error starting ngrok:', error.message);
-    console.log('[MayHost] Server will run locally only');
-  }
-
   // Mensaje final de confirmación
   console.log(`[MayHost] Server Installed`);
-  console.log(`[MayHost] You can now use your server`);
   
-  if (ngrokInfo) {
-    console.log(`[MayHost] SFTP Server accessible publicly at: ${ngrokInfo.url}`);
-    console.log(`[MayHost] Connect with any SFTP client using:`);
-    console.log(`[MayHost] - Host: ${ngrokInfo.url.replace('tcp://', '')}`);
-    console.log(`[MayHost] - Username: root`);
-    console.log(`[MayHost] - Password: mayhost123`);
-    console.log(`[MayHost] - Working directory: /root/workspace`);
+  try {
+    // Instalar ngrok
+    await installNgrok();
+    
+    // Configurar SFTP
+    await setupSFTP(container);
+    
+    // Iniciar servidor SFTP
+    const sftpProc = startSFTPServer(container);
+    
+    // Esperar un poco para que el servidor SFTP se inicie
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Iniciar ngrok
+    const ngrokProc = await startNgrok();
+    
+    console.log(`[MayHost] You can now use your server`);
+    console.log(`[MayHost] SFTP server is running and accessible publicly`);
+    
+    // Manejar el proceso principal del contenedor
+    const proot = container.prootPath;
+    const rootfs = container.rootfsPath;
+
+    const args = [
+      '-r', rootfs,
+      '-w', '/root',
+      '-b', '/proc',
+      '-b', '/sys',
+      '-b', '/dev',
+      '--kill-on-exit',
+      '/bin/sh'
+    ];
+
+    const proc = spawn(proot, args, {
+      stdio: 'inherit'
+    });
+
+    proc.on('exit', code => {
+      // Limpiar procesos al salir
+      if (sftpProc) sftpProc.kill();
+      if (ngrokProc) ngrokProc.kill();
+      process.exit(code);
+    });
+    
+    // Manejar señales de terminación
+    process.on('SIGINT', () => {
+      console.log('[MayHost] Shutting down...');
+      if (sftpProc) sftpProc.kill();
+      if (ngrokProc) ngrokProc.kill();
+      process.exit(0);
+    });
+    
+  } catch (error) {
+    console.error('[MayHost] Error:', error.message);
+    process.exit(1);
   }
-
-  const proot = container.prootPath;
-  const rootfs = container.rootfsPath;
-
-  const args = [
-    '-r', rootfs,
-    '-w', '/root',
-    '-b', '/proc',
-    '-b', '/sys',
-    '-b', '/dev',
-    '--kill-on-exit',
-    '/bin/sh'
-  ];
-
-  const proc = spawn(proot, args, {
-    stdio: 'inherit'
-  });
-
-  // Manejar cierre del proceso
-  proc.on('exit', code => {
-    if (ngrokInfo) {
-      console.log('[MayHost] Stopping ngrok...');
-      ngrokInfo.process.kill();
-    }
-    process.exit(code);
-  });
-
-  // Manejar señales de terminación
-  process.on('SIGINT', () => {
-    console.log('\n[MayHost] Shutting down...');
-    if (ngrokInfo) {
-      ngrokInfo.process.kill();
-    }
-    proc.kill();
-  });
-
-  process.on('SIGTERM', () => {
-    console.log('\n[MayHost] Shutting down...');
-    if (ngrokInfo) {
-      ngrokInfo.process.kill();
-    }
-    proc.kill();
-  });
 
 })();
