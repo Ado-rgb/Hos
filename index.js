@@ -587,8 +587,8 @@ PERMISOS DE ADMINISTRADOR ACTIVOS
   ptyOptions.env.MAYSHELL_ROLE = user.role;
   }
 
-  const pty = spawn("bash", [], ptyOptions);
-
+  pty = spawn("node", ["contenedor.cjs", user.username], ptyOptions);
+  
   // Enviar comandos al terminal
   socket.on("command", (cmd) => {
     let processedCmd = cmd;
