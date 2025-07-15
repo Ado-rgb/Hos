@@ -553,6 +553,8 @@ io.on("connection", (socket) => {
 
 `;
 
+  socket.emit("output", welcomeMessage);
+
   if (user.role === "owner" || user.role === "admin") {
     welcomeMessage += ``;
   }
