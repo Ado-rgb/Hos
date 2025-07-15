@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MayHost • Dashboard</title>
+    <title>MayHost Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -347,6 +347,21 @@
             gap: 0.5rem;
         }
 
+
+            .welcome-box {
+      background-color: rgba(0, 0, 0, 0.6); /* caja oscura pero semitransparente */
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      color: white;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px); /* efecto glassy UwU */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+        
+        
+        
         .info-card h3 i {
             color: var(--primary-color);
         }
@@ -684,9 +699,9 @@
                 <h1 class="page-title">Dashboard</h1>
             </div>
             <div class="header-right">
-                <div class="user-info">
-                    <div class="user-avatar">?</div>
-                    <span>Usuario</span>
+<div class="user-info">
+  <div class="user-avatar" id="user-avatar">?</div>
+  <span id="user-name">Usuario</span>
                 </div>
             </div>
         </div>
@@ -700,11 +715,17 @@
                 </div>
 
                 <div id="dashboardContent" style="display: none;">
+                    
+<div class="welcome-box">
+    <h2 id="welcome-text">!Hola Usuario!</h2>
+  </div>
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-header">
+                                
                                 <span class="stat-title">Memoria Total</span>
                                 <div class="stat-icon" style="background: rgba(76, 175, 80, 0.2); color: #4caf50;">
+                                    
                                     <i class="fas fa-memory"></i>
                                 </div>
                             </div>
@@ -958,6 +979,42 @@ if (sectionName === 'dashboard') {
                 `;
             }
         }
+        
+        // Mostrar saludo personalizado en el welcome-box
+const updateWelcomeText = () => {
+  const authData = JSON.parse(localStorage.getItem('syaHostAuth') || '{}');
+  const username = authData.username || 'Usuario';
+
+  const welcomeText = document.getElementById('welcome-text');
+  welcomeText.textContent = `¡Bienvenido ${username}!`;
+};
+
+// Ya existe este evento en tu script, así que agrega esto dentro:
+document.addEventListener('DOMContentLoaded', () => {
+  showUserInfo();      // <-- ya lo tienes
+  updateWelcomeText(); // <-- agrega esta línea también
+});
+        
+        // Mostrar info del usuario en el header (avatar y nombre)
+const showUserInfo = () => {
+  const userData = JSON.parse(localStorage.getItem('syaHostAuth') || '{}');
+  const username = userData.username || null;
+
+  const avatar = document.getElementById('user-avatar');
+  const nameSpan = document.getElementById('user-name');
+
+  if (username) {
+    nameSpan.textContent = username;
+    avatar.textContent = username.charAt(0).toUpperCase();
+  } else {
+    nameSpan.textContent = 'Usuario';
+    avatar.textContent = '?';
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  showUserInfo();
+});
 
         // Load stats on page load
         document.addEventListener('DOMContentLoaded', () => {
