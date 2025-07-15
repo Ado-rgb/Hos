@@ -4,10 +4,29 @@ const { createContainer } = require('@soymaycol/maycontainers');
 const { spawn } = require('child_process');
 const path = require('path');
 
+// Función para mutear console.log temporalmente
+function muteConsoleLogs(fn) {
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+
+  return fn().finally(() => {
+    console.log = originalLog;
+    console.warn = originalWarn;
+    console.error = originalError;
+  });
+}
+
 (async () => {
   const username = process.argv[2] || 'default';
 
-  // Creamos el contenedor (solo inicializa config)
+  // Mensaje personalizado de instalación
+  console.log(`[MayHost] Installing server...`);
+
   const container = createContainer({
     name: username,
     distro: 'alpine',
@@ -15,14 +34,15 @@ const path = require('path');
     shell: '/bin/sh',
   });
 
-  // Preparamos el contenedor (descarga + setup)
-  await container.init();
+  // Ejecutamos el init con logs silenciados
+  await muteConsoleLogs(() => container.init());
 
-  // Obtenemos path correcto de proot y rootfs
+  // Mensaje final de confirmación
+  console.log(`[MayHost] Server Installed!`);
+
   const proot = container.prootPath;
   const rootfs = container.rootfsPath;
 
-  // Ejecutamos directamente sin -E para evitar crash
   const args = [
     '-r', rootfs,
     '-w', '/root',
@@ -37,7 +57,7 @@ const path = require('path');
     stdio: 'inherit'
   });
 
-  proc.on('exit', (code) => {
+  proc.on('exit', code => {
     process.exit(code);
   });
 
