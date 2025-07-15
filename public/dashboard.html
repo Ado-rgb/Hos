@@ -657,6 +657,7 @@
                 <i class="fas fa-tachometer-alt"></i>
                 Dashboard
             </a>
+            
             <a href="#info" class="nav-item" data-section="info">
                 <i class="fas fa-info-circle"></i>
                 Información
@@ -665,18 +666,11 @@
                 <i class="fas fa-terminal"></i>
                 Terminal
             </a>
-            <a href="https://wa.me/51921826291?text=%C2%A1Hola%20SoyMaycol!%20Tengo%20un%20incoveniente%20en%20tu%20Host%20%3A%2F" class="nav-item">
-                <i class="fas fa-headset"></i>
-                Soporte
-            </a>
+
             <div class="nav-section">Enlaces</div>
-            <a href="https://ko-fi.com/soymaycol" class="nav-item" target="_blank">
-                <i class="fas fa-coffee"></i>
-                Ko-fi
-            </a>
-            <a href="/admin" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Admin
+            <a href="https://whatsapp.com/channel/0029VayXJte65yD6LQGiRB0R" class="nav-item">
+                <i class="fab fa-whatsapp"></i>
+                Canal de Whatsapp
             </a>
         </nav>
     </div>
@@ -898,7 +892,15 @@
                 
                 // Update page title
                 const pageTitle = document.querySelector('.page-title');
-                pageTitle.textContent = sectionName === 'dashboard' ? 'Dashboard' : 'Información';
+if (sectionName === 'dashboard') {
+    pageTitle.textContent = 'Dashboard';
+} else if (sectionName === 'info') {
+    pageTitle.textContent = 'Información';
+} else if (sectionName === 'terminal') {
+    pageTitle.textContent = 'Terminal';
+} else {
+    pageTitle.textContent = 'Sección';
+}
                 
                 // Close sidebar on mobile
                 if (window.innerWidth <= 768) {

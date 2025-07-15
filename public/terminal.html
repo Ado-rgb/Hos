@@ -500,7 +500,6 @@
           <img src="https://files.catbox.moe/zee841.png" alt="MayHost Logo">
           MayHost
           <span class="user-info" id="user-info">...</span>
-          <span class="badge-live">24/7</span>
         </div>
         <div class="terminal-actions">
           <button class="logout-btn" id="logout-btn">
@@ -528,10 +527,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <div id="connection-status" class="connection-status disconnected">
-    Desconectado
   </div>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -589,8 +584,6 @@
 
         // Eventos del socket
         socket.on("connect", () => {
-          connectionStatus.className = "connection-status connected";
-          connectionStatus.textContent = "Conectado";
           terminalOutput.textContent += "♥ Host Conectado Exitosamente ♥\n";
         });
 
@@ -821,7 +814,5 @@
     });
   </script>
       <div id="root"></div>
-    <!-- This script injects a replit badge into the page, please feel free to remove this line -->
-    <script type="text/javascript" src="https://files.catbox.moe/mqzcek.js"></script>
 </body>
 </html>
