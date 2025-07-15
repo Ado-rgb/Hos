@@ -24,9 +24,6 @@ function muteConsoleLogs(fn) {
 (async () => {
   const username = process.argv[2] || 'default';
 
-  // Mensaje personalizado de instalación
-  console.log(`[MayHost] Installing server...`);
-
   const container = createContainer({
     name: username,
     distro: 'alpine',
@@ -36,9 +33,6 @@ function muteConsoleLogs(fn) {
 
   // Ejecutamos el init con logs silenciados
   await muteConsoleLogs(() => container.init());
-
-  // Mensaje final de confirmación
-  console.log(`[MayHost] Server Installed!`);
 
   const proot = container.prootPath;
   const rootfs = container.rootfsPath;
