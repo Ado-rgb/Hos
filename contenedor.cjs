@@ -7,6 +7,7 @@ const path = require('path');
 (async () => {
   const username = process.argv[2] || 'default';
 
+  // Creamos el contenedor (solo inicializa config)
   const container = createContainer({
     name: username,
     distro: 'alpine',
@@ -14,24 +15,30 @@ const path = require('path');
     shell: '/bin/sh',
   });
 
-  await container.init(); // prepara el rootfs
+  // Preparamos el contenedor (descarga + setup)
+  await container.init();
 
-  const prootBin = require.resolve('@soymaycol/maycontainers/../bin/proot');
-  const rootfsPath = container.rootfsPath;
+  // Obtenemos path correcto de proot y rootfs
+  const proot = container.prootPath;
+  const rootfs = container.rootfsPath;
 
-  // Ejecutamos PRoot directamente, sin usar exec()
-  const pty = spawn(prootBin, [
-    '-r', rootfsPath,
+  // Ejecutamos directamente sin -E para evitar crash
+  const args = [
+    '-r', rootfs,
     '-w', '/root',
     '-b', '/proc',
     '-b', '/sys',
     '-b', '/dev',
-    '/bin/sh' // ← comando dentro del contenedor
-  ], {
+    '--kill-on-exit',
+    '/bin/sh'
+  ];
+
+  const proc = spawn(proot, args, {
     stdio: 'inherit'
   });
 
-  pty.on('exit', code => {
+  proc.on('exit', (code) => {
     process.exit(code);
   });
+
 })();
