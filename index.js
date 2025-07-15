@@ -554,23 +554,8 @@ io.on("connection", (socket) => {
 `;
 
   if (user.role === "owner" || user.role === "admin") {
-    welcomeMessage += `
-PERMISOS DE ADMINISTRADOR ACTIVOS
-- Use 'mayshell-admin help' para comandos de administración
-- Use 'mayshell-system <comando>' para comandos del sistema
-`;
+    welcomeMessage += ``;
   }
-
-  welcomeMessage += `
-¡Nuevos Comandos! ♥:
-- Use 'mayshell-host <nombre>' para hospedar un sitio web
-- Use 'mayshell-unhost <nombre>' para detener el hospedaje
-- Use 'mayshell-sites' para ver sitios hospedados
-
-> Hecho por SoyMaycol <3
-`;
-  
-  socket.emit("output", welcomeMessage);
 
   // Configurar PTY según el rol
   let ptyOptions = {
